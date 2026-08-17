@@ -25,23 +25,23 @@ class Runtime:
     def run(self) -> Dict[str, Any]:
         while self.requests_to_arrive or self.scheduler.has_waiting_requests() or self.running_requests:
             
-            # 1. Ingest arrivals
+            # take arrivals
             while self.requests_to_arrive and self.requests_to_arrive[0].arrival_time <= self.current_cycle:
                 req = self.requests_to_arrive.pop(0)
                 self.scheduler.add_request(req)
                 self.broker.log(self.current_cycle, EventType.REQUEST_ARRIVED, src_id=3, p1=req.request_id, p2=req.kv_blocks)
 
-            # 2. Update memory state
+            # Update memory state
             mem_status = self.allocator.memory_status()
             self.broker.update_memory_state(
                 utilization=mem_status["utilization"],
                 active_count=len(self.running_requests)
             )
 
-            # 3. Closed-Loop Scheduling Decision
+            # Closed-Loop Scheduling Decision
             urgent_mode = self.closed_loop and self.broker.is_memory_congested()
 
-            # 4. Schedule & Allocate
+            # Schedule & Allocate
             while self.scheduler.has_waiting_requests():
                 candidate = self.scheduler.schedule(self.current_cycle, prioritize_urgent=urgent_mode)
                 if not candidate:
@@ -56,7 +56,7 @@ class Runtime:
                     self.broker.log(self.current_cycle, EventType.ALLOCATION_STALL, src_id=2, p1=candidate.request_id, p2=candidate.kv_blocks)
                     break
 
-            # 5. Hardware Execution & Telemetry Ingestion
+            # Hardware Execution & Telemetry Ingestion
             for req in self.running_requests:
                 hw_instructions = []
                 for bid in req.allocated_block_ids:
@@ -65,12 +65,12 @@ class Runtime:
                         self.partitioner.partition_matmul(m=4, n=4, k=4, dram_a_base=dram_addr, dram_b_base=0x00)
                     )
                 
-                # Run on C++ Accelerator & ingest hardware tokens
+                # Run on accelerator; ingest hardware tokens
                 hw_cycles, raw_hw_telemetry = self.driver.execute_and_collect_telemetry(hw_instructions)
                 if raw_hw_telemetry:
                     self.broker.ingest_hardware_binary(raw_hw_telemetry)
 
-            # 6. Advance tokens
+            # advance tokens
             still_running = []
             for req in self.running_requests:
                 if req.advance_request(self.current_cycle):

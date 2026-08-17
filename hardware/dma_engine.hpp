@@ -7,29 +7,21 @@
 
 class DMAEngine {
 public:
-    static constexpr uint32_t BYTES_PER_CYCLE = 16; // 16B/cycle memory bandwidth
+    static constexpr uint32_t BYTES_PER_CYCLE = 16; // 16B per cycle memory bandwidth for transfer from DRAM to SRAM
 
     bool is_transferring = false;
     uint32_t transfer_end_cycle = 0;
     uint8_t active_bank = 0;
 
+    // will return number of cycles to tranfer data or if in transfer
     bool can_start_transfer(const ScratchpadSRAM& sram, uint8_t target_bank) const {
         return !is_transferring && sram.is_bank_available(target_bank);
     }
 
-    void start_transfer(uint32_t size_bytes, uint8_t target_bank, uint32_t current_cycle, ScratchpadSRAM& sram) {
+    uint32_t start_transfer(uint32_t size_bytes, uint8_t target_bank, uint32_t current_cycle, ScratchpadSRAM& sram) {
         uint32_t transfer_cycles = (size_bytes + BYTES_PER_CYCLE - 1) / BYTES_PER_CYCLE;
-        is_transferring = true;
-        transfer_end_cycle = current_cycle + transfer_cycles;
-        active_bank = target_bank;
-        sram.lock_bank(target_bank, transfer_cycles, current_cycle);
-    }
-
-    void update_cycle(uint32_t current_cycle) {
-        if (is_transferring && current_cycle >= transfer_end_cycle) {
-            is_transferring = false;
-        }
-    }
+        sram.lock_bank(target_bank, transfer_cycles, current_cycle); // lock bank for the calculated cycles
+        return transfer_cycles; // number of cycles so loop doesn't constantly check is transfer is over
 };
 
 #endif

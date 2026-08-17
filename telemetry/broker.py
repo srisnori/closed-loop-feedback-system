@@ -7,18 +7,18 @@ class TelemetryBroker:
         self.history_window = history_window
         self.events: List[EventToken] = []
         
-        # Sliding windows for live signals
+        # sliding windows for live signals
         self.recent_alloc_stalls: Deque[int] = deque(maxlen=history_window)
         self.recent_bank_conflicts: Deque[int] = deque(maxlen=history_window)
         
-        # State tracking
+        # state tracking
         self.memory_utilization: float = 0.0
         self.active_requests_count: int = 0
 
     def publish(self, token: EventToken) -> None:
         self.events.append(token)
 
-        # Update sliding window indicators
+        # update sliding window indicators
         if token.event_type == EventType.ALLOCATION_STALL:
             self.recent_alloc_stalls.append(1)
         elif token.event_type == EventType.SRAM_BANK_CONFLICT:
@@ -29,7 +29,6 @@ class TelemetryBroker:
         self.publish(tok)
 
     def ingest_hardware_binary(self, raw_bytes: bytes) -> int:
-        """Parses batch of 16-byte tokens emitted by the C++ hardware engine."""
         token_size = 16
         num_tokens = len(raw_bytes) // token_size
         for i in range(num_tokens):

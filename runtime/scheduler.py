@@ -13,13 +13,13 @@ class Scheduler:
             return None
 
         if prioritize_urgent:
-            # Closed-Loop Feedback Active: Prioritize requests closest to SLO deadline
+            # closed loop feedback true: prioritize requests closest to SLO deadline
             self.waiting_queue.sort(
                 key=lambda req: req.get_urgency_score(current_time),
                 reverse=True
             )
         else:
-            # Baseline Open-Loop: Standard First-Come, First-Served (FCFS)
+            # baseline open loop: standard first come first serve (FCFS)
             self.waiting_queue.sort(key=lambda req: req.arrival_time)
 
         return self.waiting_queue.pop(0)

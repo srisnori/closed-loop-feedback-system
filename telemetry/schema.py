@@ -3,7 +3,7 @@ from enum import IntEnum
 from dataclasses import dataclass
 
 class EventType(IntEnum):
-    # Hardware Silicon Events (0x01 - 0x1F)
+    # hardware events (0x01 - 0x1F)
     DMA_TRANSFER_START      = 0x01
     DMA_TRANSFER_DONE       = 0x02
     SRAM_BANK_CONFLICT      = 0x03
@@ -11,7 +11,7 @@ class EventType(IntEnum):
     SYSTOLIC_COMPUTE_DONE   = 0x05
     HARDWARE_STALL          = 0x06
 
-    # Serving Runtime Events (0x20 - 0x3F)
+    # runtime events (0x20 - 0x3F)
     REQUEST_ARRIVED         = 0x20
     REQUEST_SCHEDULED       = 0x21
     MEMORY_ALLOCATED        = 0x22
@@ -22,13 +22,13 @@ class EventType(IntEnum):
 
 @dataclass(slots=True)
 class EventToken:
-    timestamp_cycle: int    # uint32 (4 bytes)
-    event_type: EventType   # uint16 (2 bytes)
-    source_id: int          # uint16 (2 bytes): 0=HW, 1=Scheduler, 2=Memory, 3=Runtime
-    payload_1: int          # int32  (4 bytes): e.g., request_id or bank_id
-    payload_2: int          # int32  (4 bytes): e.g., size_bytes or latency
+    timestamp_cycle: int # uint32 (4 bytes)
+    event_type: EventType # uint16 (2 bytes)
+    source_id: int # uint16 (2 bytes): 0=HW, 1=Scheduler, 2=Memory, 3=Runtime
+    payload_1: int # int32  (4 bytes)
+    payload_2: int # int32  (4 bytes)
 
-    # Binary Format: Little-endian uint32, uint16, uint16, int32, int32 -> 16 bytes exactly
+    # format: little endian uint32, uint16, uint16, int32, int32 -> 16 bytes 
     FORMAT = "<IHHi i"
 
     def pack(self) -> bytes:

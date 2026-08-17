@@ -7,10 +7,7 @@ class TensorPartitioner:
         self.tile_size_bytes = tile_dim * tile_dim * bytes_per_element
 
     def partition_matmul(self, m: int, n: int, k: int, dram_a_base: int, dram_b_base: int) -> List[Instruction]:
-        """
-        Decomposes an (M x K) @ (K x N) matrix multiplication into
-        tiled DMA transfers and systolic array compute instructions.
-        """
+        # Decomposes huge matrix multiplication into tiles 
         instructions: List[Instruction] = []
         
         m_tiles = (m + self.tile_dim - 1) // self.tile_dim
@@ -20,7 +17,7 @@ class TensorPartitioner:
         for i in range(m_tiles):
             for j in range(n_tiles):
                 for l in range(k_tiles):
-                    # Load Tile A into Bank 0
+                    # load Tile A into Bank 0
                     addr_a = dram_a_base + (i * k_tiles + l) * self.tile_size_bytes
                     instructions.append(Instruction(
                         opcode=Opcode.DMA_LOAD_DRAM_TO_SRAM,
@@ -30,7 +27,7 @@ class TensorPartitioner:
                         sram_bank=0
                     ))
 
-                    # Load Tile B into Bank 1
+                    # load Tile B into Bank 1
                     addr_b = dram_b_base + (l * n_tiles + j) * self.tile_size_bytes
                     instructions.append(Instruction(
                         opcode=Opcode.DMA_LOAD_DRAM_TO_SRAM,
@@ -40,14 +37,10 @@ class TensorPartitioner:
                         sram_bank=1
                     ))
 
-                    # Wait for transfers to complete
+                    # wait for transfers to complete
                     instructions.append(Instruction(opcode=Opcode.SYNC))
 
-                    # Execute compute on loaded tiles
-                    instructions.append(Instruction(
-                        opcode=Opcode.MATMUL_TILE,
-                        sram_bank=0
-                    ))
-
+                    # compute on loaded tiles
+                    instructions.append(Instruction(opcode=Opcode.MATMUL_TILE, sram_bank=0))
         instructions.append(Instruction(opcode=Opcode.HALT))
         return instructions

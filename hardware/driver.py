@@ -42,5 +42,4 @@ class HardwareDriver:
             self.accel_ptr = None
 
     def __del__(self):
-        # Let OS reclaim process memory cleanly on shutdown to prevent GC race crashes
         pass

@@ -16,7 +16,7 @@ class Request:
     slo_deadline: int
     kv_blocks: int
     
-    # Execution state
+    # execution state
     remaining_tokens: int = field(init=False)
     allocated_block_ids: List[int] = field(default_factory=list)
     state: RequestState = RequestState.WAITING
@@ -31,7 +31,6 @@ class Request:
         self.start_cycle = current_cycle
 
     def advance_request(self, current_cycle: int) -> bool:
-        """Decrements 1 token per cycle. Returns True if request has completed."""
         self.remaining_tokens -= 1
         if self.remaining_tokens <= 0:
             self.state = RequestState.COMPLETED
@@ -39,11 +38,6 @@ class Request:
             return True
         return False
 
-    def get_urgency_score(self, current_time: int) -> float:
-        """
-        Slack-based urgency metric:
-        Remaining Slack = (deadline - current_time) - remaining_execution_tokens
-        Returns -slack so smaller slack yields higher urgency value.
-        """
+    def get_urgency_score(self, current_time: int) -> float: # deadlines checker
         slack = (self.slo_deadline - current_time) - self.remaining_tokens
         return -slack

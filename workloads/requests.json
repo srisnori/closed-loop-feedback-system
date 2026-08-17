@@ -1,0 +1,47 @@
+{
+  "model_config": {
+    "name": "llama-3-8b",
+    "num_layers": 32,
+    "num_heads_kv": 8,
+    "head_dim": 128,
+    "dtype_bytes": 2,
+    "block_size_tokens": 16
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "arrival_time": 0,
+      "prompt_tokens": 128,
+      "output_tokens": 32,
+      "slo_deadline": 70
+    },
+    {
+      "request_id": 2,
+      "arrival_time": 2,
+      "prompt_tokens": 256,
+      "output_tokens": 48,
+      "slo_deadline": 120
+    },
+    {
+      "request_id": 3,
+      "arrival_time": 5,
+      "prompt_tokens": 512,
+      "output_tokens": 64,
+      "slo_deadline": 140
+    },
+    {
+      "request_id": 4,
+      "arrival_time": 8,
+      "prompt_tokens": 64,
+      "output_tokens": 16,
+      "slo_deadline": 50
+    },
+    {
+      "request_id": 5,
+      "arrival_time": 10,
+      "prompt_tokens": 384,
+      "output_tokens": 40,
+      "slo_deadline": 110
+    }
+  ]
+}

@@ -25,6 +25,7 @@ class Runtime:
 
     def run(self) -> Dict[str, Any]:
         while self.requests_to_arrive or self.scheduler.has_waiting_requests() or self.running_requests:
+            
             while self.requests_to_arrive and self.requests_to_arrive[0].arrival_time <= self.current_cycle:
                 req = self.requests_to_arrive.pop(0)
                 self.scheduler.add_request(req)
@@ -82,7 +83,9 @@ class Runtime:
                         self.partitioner.partition_matmul(m=4, n=4, k=4, dram_a_base=dram_addr, dram_b_base=0x00)
                     )
                 hw_cycles, raw_hw_telemetry = self.driver.execute_and_collect_telemetry(hw_instructions)
-                if raw_hw_telemetry:
+                
+                # event driven telemntry: Only pay the tax if a request is actually waiting
+                if raw_hw_telemetry and self.scheduler.has_waiting_requests():
                     self.broker.ingest_hardware_binary(raw_hw_telemetry)
                     if self.closed_loop:
                         self.telemetry_tax_cycles += 1 
@@ -106,9 +109,7 @@ class Runtime:
                 else:
                     still_running.append(req)
             self.running_requests = still_running
-
             self.current_cycle += 1
-
         return self.get_summary()
 
     def get_summary(self) -> Dict[str, Any]:

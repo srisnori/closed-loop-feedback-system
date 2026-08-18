@@ -6,7 +6,7 @@ from runtime.workload_loader import load_workload
 from telemetry.broker import TelemetryBroker
 
 def run_experiment():
-    requests_base, model_meta = load_workload("workloads/requests.json")
+    requests_base, model_meta = load_workload("workloads/requests.json") 
     requests_closed = copy.deepcopy(requests_base)
     print(f"MODEL: {model_meta['name']} ({len(requests_base)} requests)\n")
 
@@ -60,10 +60,6 @@ def run_experiment():
     for req in sorted(requests_closed, key=lambda r: r.request_id):
         met_slo = "Yes" if (req.latency > 0 and req.latency <= req.slo_deadline) else "No"
         print(f"{req.request_id:<8} | {req.arrival_time:<8} | {req.start_cycle:<8} | {req.finish_cycle:<8} | {req.latency:<8} | {req.slo_deadline:<8} | {met_slo:<10}")
-
-    # force C++ memory cleanup before python unloads shared library
-    rt_base.shutdown()
-    rt_closed.shutdown()
 
 if __name__ == "__main__":
     run_experiment()

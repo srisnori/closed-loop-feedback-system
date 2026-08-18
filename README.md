@@ -30,6 +30,6 @@ Running the `llama-3-8b` synthetic workload across a simulated 48-block memory p
 | **SLO Violations** | 2 | **0** |
 | **SLO Attainment** | 60.0% | **100.0%** |
 
-### 💸 The Cost of Observability
+### The Cost of Observability
 ```text
 TELEMETRY TAX: 132 cycles

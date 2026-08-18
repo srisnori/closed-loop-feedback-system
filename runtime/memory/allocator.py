@@ -41,10 +41,5 @@ class Allocator:
         elif utilization >= 0.60:
             pressure = "MEDIUM"
 
-        return {
-            "total_blocks": self.total_blocks,
-            "free_blocks": free_cnt,
-            "allocated_blocks": alloc_cnt,
-            "utilization": utilization,
-            "pressure": pressure
-        }
+        return {"total_blocks": self.total_blocks, "free_blocks": free_cnt, "allocated_blocks": alloc_cnt,
+            "utilization": utilization, "pressure": pressure}

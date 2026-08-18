@@ -36,10 +36,11 @@ class HardwareDriver:
 
         return cycles, raw_telemetry
 
-    def close(self):
-        if hasattr(self, "accel_ptr") and self.accel_ptr:
-            lib.destroy_accelerator(self.accel_ptr)
+    def close(self): # tear down the C++ object from the heap
+        if getattr(self, "accel_ptr", None) is not None:
+            try:
+                lib.destroy_accelerator(self.accel_ptr)
+            except Exception:
+                pass 
             self.accel_ptr = None
-
-    def __del__(self):
-        pass
+            

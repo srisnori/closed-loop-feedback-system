@@ -6,6 +6,7 @@ class TelemetryBroker:
     def __init__(self, history_window: int = 100):
         self.history_window = history_window
         self.events: List[EventToken] = []
+        self.traces: List[str] = []  # Chronological trace log
         
         # sliding windows for live signals
         self.recent_alloc_stalls: Deque[int] = deque(maxlen=history_window)
@@ -27,6 +28,10 @@ class TelemetryBroker:
     def log(self, cycle: int, event_type: EventType, src_id: int, p1: int = 0, p2: int = 0) -> None:
         tok = EventToken(cycle, event_type, src_id, p1, p2)
         self.publish(tok)
+
+    # NEW: Trace logger for the timeline
+    def log_trace(self, cycle: int, message: str) -> None:
+        self.traces.append(f"[Cycle {cycle:03d}] {message}")
 
     def ingest_hardware_binary(self, raw_bytes: bytes) -> int:
         token_size = 16
@@ -59,5 +64,6 @@ class TelemetryBroker:
             "memory_utilization_current": f"{round(self.memory_utilization * 100, 1)}%",
             "memory_congested_signal": self.is_memory_congested(),
             "hardware_bottleneck_signal": self.is_hardware_bottlenecked(),
-            "event_breakdown": counts
+            "event_breakdown": counts,
+            "traces": self.traces 
         }
